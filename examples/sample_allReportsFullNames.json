@@ -1,0 +1,7 @@
+[
+  "Operations/Service_Orders_By_Status",
+  "Operations/Open_Service_Orders",
+  "Service/Technician_Productivity",
+  "Service/Work_Completed_Summary",
+  "Finance/Service_Costs_By_Month"
+]
