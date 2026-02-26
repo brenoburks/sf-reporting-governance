@@ -11,6 +11,10 @@ def run(cmd):
 
 
 def extract_fullnames(payload):
+    """
+    Handles SF CLI JSON variations where result may be a dict with `metadata`,
+    a list, or null.
+    """
     res = payload.get("result", [])
     items = res.get("metadata") if isinstance(res, dict) else res
 
@@ -29,23 +33,29 @@ def extract_fullnames(payload):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--target-org")
-    parser.add_argument("--folders-json", default="reportFolders.json")
-    parser.add_argument("--out", default="allReportsFullNames.json")
-    parser.add_argument("--example", action="store_true")
+    parser = argparse.ArgumentParser(description="List report fullNames by enumerating folders.")
+    parser.add_argument("--target-org", help="Salesforce org alias/username (sf --target-org)")
+    parser.add_argument("--folders-json", default="reportFolders.json", help="Input folders JSON file")
+    parser.add_argument("--out", default="allReportsFullNames.json", help="Output report fullNames JSON file")
+    parser.add_argument(
+        "--example",
+        action="store_true",
+        help="Training mode. If folders-json is missing, falls back to examples/reportFolders.json "
+             "and simulates list-metadata responses (no org required).",
+    )
     args = parser.parse_args()
 
     folders_path = Path(args.folders_json)
     out_path = Path(args.out)
 
-    if args.example:
+    # Fix 2: Example mode only forces examples file IF the provided folders-json doesn't exist.
+    if args.example and not folders_path.exists():
         folders_path = Path("examples/reportFolders.json")
 
     if not folders_path.exists():
         raise FileNotFoundError(f"Missing folders file: {folders_path}")
 
-    folders_payload = json.loads(folders_path.read_text())
+    folders_payload = json.loads(folders_path.read_text(encoding="utf-8"))
     folders = extract_fullnames(folders_payload)
 
     print("Folder count:", len(folders))
@@ -89,7 +99,6 @@ def main():
     # De-dupe (stable ordering)
     seen = set()
     dedup = []
-
     for r in all_reports:
         if r not in seen:
             seen.add(r)
@@ -98,7 +107,7 @@ def main():
     print("\nTotal reports found:", len(dedup))
     print("Sample:", dedup[:10])
 
-    out_path.write_text(json.dumps(dedup, indent=2))
+    out_path.write_text(json.dumps(dedup, indent=2), encoding="utf-8")
     print(f"\n[OK] Wrote {out_path}")
 
 
