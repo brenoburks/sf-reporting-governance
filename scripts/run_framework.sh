@@ -117,6 +117,7 @@ if [[ "$MODE" == "org" ]]; then
   # 6) scoring + rollup
   python3 scripts/reportRiskScoring.py
   python3 scripts/objectRiskRollup.py
+  python3 scripts/reportLevelRisk.py
 
   echo ""
   echo "[OK] Org run complete"
