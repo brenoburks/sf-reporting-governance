@@ -1,0 +1,52 @@
+name: framework-ci
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  run-example-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run framework in example mode
+        run: |
+          set -euo pipefail
+
+          # 1) Generate example report folder payload (no org required)
+          python3 scripts/listReportFolders.py --example
+
+          # 2) Generate example allReportsFullNames.json (no org required)
+          python3 scripts/listReportsByFolder.py --example
+
+          # 3) Build manifest XML files (will write into manifest/)
+          python3 scripts/buildReportManifest.py
+
+          # 4) Dependency analysis against sample report metadata
+          python3 scripts/reportDependencyAnalysis.py --example
+
+          # 5) Weighted risk scoring + object rollup
+          python3 scripts/reportRiskScoring.py
+          python3 scripts/objectRiskRollup.py
+
+          # 6) Impact simulation sanity check (non-empty output)
+          python3 scripts/simulateFieldImpact.py --field "SVMXC__Service_Order__c.SVMXC__Order_Status__c"
+
+      - name: Ensure no generated artifacts are committed
+        run: |
+          set -euo pipefail
+          # If CI generates files that are not meant to be committed, git should still be clean.
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Repo has uncommitted changes after running pipeline:"
+            git status --porcelain
+            exit 1
+          fi
