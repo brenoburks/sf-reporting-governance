@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+  <columns>SVMXC__Service_Order__c.Name</columns>
+  <columns>SVMXC__Service_Order__c.CreatedDate</columns>
+  <criteriaItems>
+    <column>SVMXC__Service_Order__c.SVMXC__Order_Status__c</column>
+    <operator>in</operator>
+    <value>Open,In Progress</value>
+  </criteriaItems>
+</Report>
