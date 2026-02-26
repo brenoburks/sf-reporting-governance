@@ -2,7 +2,7 @@ name: framework-ci
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
 
 jobs:
@@ -17,6 +17,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+
+      - name: Show tool versions
+        run: |
+          set -euo pipefail
+          python3 --version
+          git --version
 
       - name: Run framework in example mode
         run: |
@@ -26,6 +33,7 @@ jobs:
           python3 scripts/listReportFolders.py --example
 
           # 2) Generate example allReportsFullNames.json (no org required)
+          # IMPORTANT: use the folders file generated in step 1
           python3 scripts/listReportsByFolder.py --example --folders-json reportFolders.json
 
           # 3) Build manifest XML files (will write into manifest/)
