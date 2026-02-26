@@ -26,7 +26,7 @@ jobs:
           python3 scripts/listReportFolders.py --example
 
           # 2) Generate example allReportsFullNames.json (no org required)
-          python3 scripts/listReportsByFolder.py --example
+          python3 scripts/listReportsByFolder.py --example --folders-json reportFolders.json
 
           # 3) Build manifest XML files (will write into manifest/)
           python3 scripts/buildReportManifest.py
