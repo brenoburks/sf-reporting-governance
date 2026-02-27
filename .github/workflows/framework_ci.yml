@@ -17,11 +17,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
       - name: Show tool versions
         run: |
-          set -euo pipefail
           python3 --version
           git --version
 
@@ -29,30 +27,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 1) Generate example report folder payload (no org required)
           python3 scripts/listReportFolders.py --example
-
-          # 2) Generate example allReportsFullNames.json (no org required)
-          # IMPORTANT: use the folders file generated in step 1
           python3 scripts/listReportsByFolder.py --example --folders-json reportFolders.json
-
-          # 3) Build manifest XML files (will write into manifest/)
           python3 scripts/buildReportManifest.py
-
-          # 4) Dependency analysis against sample report metadata
           python3 scripts/reportDependencyAnalysis.py --example
-
-          # 5) Weighted risk scoring + object rollup
           python3 scripts/reportRiskScoring.py
           python3 scripts/objectRiskRollup.py
-
-          # 6) Impact simulation sanity check (non-empty output)
+          python3 scripts/reportLevelRisk.py
+          python3 scripts/generateGovernanceReport.py
           python3 scripts/simulateFieldImpact.py --field "SVMXC__Service_Order__c.SVMXC__Order_Status__c"
 
-      - name: Ensure no generated artifacts are committed
+      - name: Ensure repo is clean
         run: |
-          set -euo pipefail
-          # If CI generates files that are not meant to be committed, git should still be clean.
           if [[ -n "$(git status --porcelain)" ]]; then
             echo "Repo has uncommitted changes after running pipeline:"
             git status --porcelain
