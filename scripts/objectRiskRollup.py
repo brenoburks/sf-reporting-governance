@@ -4,27 +4,13 @@ import csv
 from collections import defaultdict
 from pathlib import Path
 
+from governance_config import (
+    TYPE_WEIGHTS, REPORT_COUNT_WEIGHT, INSTANCE_WEIGHT,
+    OBJECT_RISK_BANDS, classify_risk,
+)
+
 DEFAULT_DEPS = Path("data/outputs/report_field_dependencies.csv")
 DEFAULT_OUT = Path("data/outputs/object_risk_rollup.csv")
-
-TYPE_WEIGHTS = {
-    "column": 1,
-    "filter_column": 4,
-    "grouping": 3,
-}
-
-REPORT_COUNT_WEIGHT = 10
-INSTANCE_WEIGHT = 1
-
-
-def classify_risk(score: int) -> str:
-    if score >= 300:
-        return "Critical"
-    if score >= 150:
-        return "High"
-    if score >= 60:
-        return "Medium"
-    return "Low"
 
 
 def object_from_reference(ref: str) -> str:
@@ -80,7 +66,7 @@ def main() -> int:
         field_count = len(obj_fields[obj])
 
         risk_score = (report_count * REPORT_COUNT_WEIGHT) + (weighted_instances * INSTANCE_WEIGHT)
-        risk_band = classify_risk(risk_score)
+        risk_band = classify_risk(risk_score, OBJECT_RISK_BANDS)
 
         rows.append(
             {

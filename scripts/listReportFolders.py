@@ -6,8 +6,16 @@ from pathlib import Path
 
 
 def run(cmd):
-    out = subprocess.check_output(cmd, text=True)
-    return json.loads(out)
+    try:
+        out = subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT)
+    except FileNotFoundError:
+        raise SystemExit("ERROR: 'sf' CLI not found. Install from https://developer.salesforce.com/tools/salesforcecli")
+    except subprocess.CalledProcessError as e:
+        raise SystemExit(f"ERROR: sf CLI failed (exit code {e.returncode}):\n{e.output.strip()}")
+    try:
+        return json.loads(out)
+    except json.JSONDecodeError:
+        raise SystemExit(f"ERROR: Unexpected response from sf CLI (not valid JSON):\n{out[:500]}")
 
 
 def main():

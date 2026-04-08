@@ -13,8 +13,9 @@ What it does:
   3) Build batched package.xml manifests
   4) (Optional) Retrieve reports (org mode only; set DO_RETRIEVE=true)
   5) Dependency analysis (example uses sample XML; org mode expects retrieved metadata)
-  6) Risk scoring + object rollup
-  7) Impact simulation sanity check
+  6) Risk scoring + object rollup + report ranking
+  7) Executive governance summary
+  8) Impact simulation sanity check
 
 Options:
   --example            Run end-to-end using examples/ sample inputs (no org required)
@@ -81,11 +82,15 @@ if [[ "$MODE" == "example" ]]; then
   # 4) dependency analysis against sample report XML
   python3 scripts/reportDependencyAnalysis.py --example
 
-  # 5) scoring + rollup
+  # 5) scoring + rollup + report ranking
   python3 scripts/reportRiskScoring.py
   python3 scripts/objectRiskRollup.py
+  python3 scripts/reportLevelRisk.py
 
-  # 6) impact simulation sanity check
+  # 6) executive governance summary
+  python3 scripts/generateGovernanceReport.py
+
+  # 7) impact simulation sanity check
   python3 scripts/simulateFieldImpact.py --field "SVMXC__Service_Order__c.SVMXC__Order_Status__c"
 
   echo ""
@@ -114,10 +119,13 @@ if [[ "$MODE" == "org" ]]; then
   # 5) dependency analysis against retrieved metadata
   python3 scripts/reportDependencyAnalysis.py --reports-root "force-app/main/default/reports"
 
-  # 6) scoring + rollup
+  # 6) scoring + rollup + report ranking
   python3 scripts/reportRiskScoring.py
   python3 scripts/objectRiskRollup.py
   python3 scripts/reportLevelRisk.py
+
+  # 7) executive governance summary
+  python3 scripts/generateGovernanceReport.py
 
   echo ""
   echo "[OK] Org run complete"

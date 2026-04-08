@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+import argparse
 import csv
 from pathlib import Path
 from collections import Counter
 
-FIELDS_CSV = Path("data/outputs/report_field_risk_scored.csv")
-OBJECTS_CSV = Path("data/outputs/object_risk_rollup.csv")
-REPORTS_CSV = Path("data/outputs/report_risk_ranked.csv")
-OUT_MD = Path("data/outputs/governance_summary.md")
+DEFAULT_FIELDS_CSV = Path("data/outputs/report_field_risk_scored.csv")
+DEFAULT_OBJECTS_CSV = Path("data/outputs/object_risk_rollup.csv")
+DEFAULT_REPORTS_CSV = Path("data/outputs/report_risk_ranked.csv")
+DEFAULT_OUT_MD = Path("data/outputs/governance_summary.md")
 
 
-def read_csv(path: Path) -> list[dict]:
+def read_csv(path: Path) -> list:
     if not path.exists():
         return []
     with path.open("r", encoding="utf-8") as f:
@@ -24,9 +25,17 @@ def to_int(val: str, default: int = 0) -> int:
 
 
 def main() -> int:
-    fields = read_csv(FIELDS_CSV)
-    objects = read_csv(OBJECTS_CSV)
-    reports = read_csv(REPORTS_CSV)
+    parser = argparse.ArgumentParser(description="Generate executive governance summary.")
+    parser.add_argument("--fields-csv", default=str(DEFAULT_FIELDS_CSV))
+    parser.add_argument("--objects-csv", default=str(DEFAULT_OBJECTS_CSV))
+    parser.add_argument("--reports-csv", default=str(DEFAULT_REPORTS_CSV))
+    parser.add_argument("--out", default=str(DEFAULT_OUT_MD))
+    args = parser.parse_args()
+
+    fields = read_csv(Path(args.fields_csv))
+    objects = read_csv(Path(args.objects_csv))
+    reports = read_csv(Path(args.reports_csv))
+    OUT_MD = Path(args.out)
 
     fields_sorted = sorted(fields, key=lambda x: to_int(x.get("risk_score", "0")), reverse=True)
     objects_sorted = sorted(objects, key=lambda x: to_int(x.get("risk_score", "0")), reverse=True)

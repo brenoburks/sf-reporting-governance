@@ -6,8 +6,18 @@ from pathlib import Path
 
 
 def run(cmd):
-    out = subprocess.check_output(cmd, text=True)
-    return json.loads(out)
+    try:
+        out = subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT)
+    except FileNotFoundError:
+        raise SystemExit("ERROR: 'sf' CLI not found. Install from https://developer.salesforce.com/tools/salesforcecli")
+    except subprocess.CalledProcessError as e:
+        print(f"  ERROR: sf CLI failed (exit code {e.returncode}). Skipping.")
+        return None
+    try:
+        return json.loads(out)
+    except json.JSONDecodeError:
+        print(f"  ERROR: Invalid JSON from sf CLI. Skipping.")
+        return None
 
 
 def extract_fullnames(payload):
@@ -93,6 +103,8 @@ def main():
                 cmd.extend(["--target-org", args.target_org])
 
             payload = run(cmd)
+            if payload is None:
+                continue
 
         all_reports.extend(extract_fullnames(payload))
 
