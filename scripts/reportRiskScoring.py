@@ -4,29 +4,13 @@ import csv
 from collections import defaultdict
 from pathlib import Path
 
+from governance_config import (
+    TYPE_WEIGHTS, REPORT_COUNT_WEIGHT, INSTANCE_WEIGHT,
+    FIELD_RISK_BANDS, classify_risk,
+)
+
 DEFAULT_INPUT = Path("data/outputs/report_field_dependencies.csv")
 DEFAULT_OUTPUT = Path("data/outputs/report_field_risk_scored.csv")
-
-# Tunable weights (governance knobs)
-TYPE_WEIGHTS = {
-    "column": 1,         # field shown in report output
-    "filter_column": 4,  # field used in filtering logic
-    "grouping": 3,       # field used in grouping logic
-}
-
-# Tunable multipliers
-REPORT_COUNT_WEIGHT = 10   # each distinct report referencing the field
-INSTANCE_WEIGHT = 1        # each occurrence (after TYPE_WEIGHTS applied)
-
-def classify_risk(score: int) -> str:
-    # Starter bands (tune later once you have real org data)
-    if score >= 120:
-        return "Critical"
-    if score >= 70:
-        return "High"
-    if score >= 30:
-        return "Medium"
-    return "Low"
 
 
 def main() -> int:
@@ -66,7 +50,7 @@ def main() -> int:
         weighted_instances = field_weighted_instances[ref]
 
         risk_score = (report_count * REPORT_COUNT_WEIGHT) + (weighted_instances * INSTANCE_WEIGHT)
-        risk_band = classify_risk(risk_score)
+        risk_band = classify_risk(risk_score, FIELD_RISK_BANDS)
 
         rows.append(
             {

@@ -32,7 +32,7 @@ def parse_args():
     return p.parse_args()
 
 
-def get_text(el: ET.Element | None) -> str:
+def get_text(el) -> str:
     return el.text.strip() if el is not None and el.text else ""
 
 

@@ -4,13 +4,9 @@ import csv
 from collections import defaultdict
 from pathlib import Path
 
-DEFAULT_DEPS = Path("data/outputs/report_field_dependencies.csv")
+from governance_config import TYPE_WEIGHTS
 
-TYPE_WEIGHTS = {
-    "column": 1,
-    "filter_column": 4,
-    "grouping": 3,
-}
+DEFAULT_DEPS = Path("data/outputs/report_field_dependencies.csv")
 
 def parse_args():
     p = argparse.ArgumentParser(
